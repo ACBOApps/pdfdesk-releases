@@ -1,6 +1,6 @@
-# Δημοσίευση έκδοσης: όταν ανέβει branch "upload/vX.Y.Z" με τα κομμάτια του setup
-# και το υπογεγραμμένο pdfdesk-update.json, ενώνει το setup, ελέγχει το SHA-256,
-# δημιουργεί το Release και σβήνει το branch.
+# Δημοσίευση έκδοσης: το branch upload/vX.Y.Z περιέχει τα κομμάτια του installer
+# και το manifest. Το workflow ενώνει το αρχείο, ελέγχει το SHA-256 και
+# δημοσιεύει το Release με ασφαλή επανάληψη σε περίπτωση διακοπής.
 name: publish
 on:
   push:
@@ -21,36 +21,67 @@ jobs:
           GOT=$(sha256sum PDFDesk-Setup-$V.exe | cut -d' ' -f1)
           [ "$WANT" = "$GOT" ] || { echo "SHA-256 mismatch"; exit 1; }
           echo "V=$V" >> "$GITHUB_ENV"
-      - name: Release
+      - name: Δημιουργία και δημοσίευση Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           TAG="v$V"
+
+          find_release_id() {
+            gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+              --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -n 1
+          }
+
+          # Reuse an existing draft/published release, or create a draft first.
+          RELEASE_ID=$(find_release_id || true)
+          if [ -z "$RELEASE_ID" ]; then
+            CREATED=0
+            for ATTEMPT in 1 2 3 4 5 6; do
+              if gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
+                  --target main --title "PDFDesk $V" --notes-file release/notes.txt --draft; then
+                CREATED=1
+                break
+              fi
+              RELEASE_ID=$(find_release_id || true)
+              [ -n "$RELEASE_ID" ] && { CREATED=1; break; }
+              if [ "$ATTEMPT" -lt 6 ]; then
+                echo "Προσωρινό σφάλμα δημιουργίας Release· νέα προσπάθεια..."
+                sleep 15
+              fi
+            done
+            [ "$CREATED" -eq 1 ] || { echo "Δεν δημιουργήθηκε το Release $TAG"; exit 1; }
+            RELEASE_ID=$(find_release_id || true)
+          fi
+          [ -n "$RELEASE_ID" ] || { echo "Δεν βρέθηκε το Release $TAG"; exit 1; }
+          echo "Release ID: $RELEASE_ID"
+
+          # Upload only missing assets; the draft can safely be resumed after interruption.
+          ASSETS=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" \
+            --jq '[.assets[].name] | join("\n")')
+          if ! grep -Fxq "PDFDesk-Setup-$V.exe" <<< "$ASSETS"; then
+            gh release upload "$TAG" "PDFDesk-Setup-$V.exe" \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          fi
+          if ! grep -Fxq "pdfdesk-update.json" <<< "$ASSETS"; then
+            gh release upload "$TAG" release/pdfdesk-update.json \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          fi
+
+          # Publish first, then designate this release as latest.
           PUBLISHED=0
-          # Retry transient failures from GitHub's Releases API.
-          for ATTEMPT in 1 2 3 4 5 6 7 8; do
-            if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-              echo "Το Release υπάρχει ήδη· ολοκλήρωση μεταφόρτωσης αρχείων."
-              if gh release upload "$TAG" "PDFDesk-Setup-$V.exe" release/pdfdesk-update.json \
-                  --repo "$GITHUB_REPOSITORY" --clobber &&
-                 gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --latest; then
-                PUBLISHED=1
-                break
-              fi
-            else
-              if gh release create "$TAG" "PDFDesk-Setup-$V.exe" release/pdfdesk-update.json \
-                  --repo "$GITHUB_REPOSITORY" --target main --title "PDFDesk $V" \
-                  --notes-file release/notes.txt --latest; then
-                PUBLISHED=1
-                break
-              fi
+          for ATTEMPT in 1 2 3 4 5 6; do
+            if gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" \
+                -F draft=false -f make_latest=true >/dev/null; then
+              PUBLISHED=1
+              break
             fi
-            if [ "$ATTEMPT" -lt 8 ]; then
-              echo "Αποτυχία προσωρινής επικοινωνίας· νέα προσπάθεια σε $((ATTEMPT * 10)) δευτερόλεπτα."
-              sleep $((ATTEMPT * 10))
+            if [ "$ATTEMPT" -lt 6 ]; then
+              echo "Προσωρινό σφάλμα δημοσίευσης· νέα προσπάθεια..."
+              sleep 15
             fi
           done
-          [ "$PUBLISHED" -eq 1 ] || { echo "Αποτυχία δημοσίευσης μετά από 8 προσπάθειες."; exit 1; }
+          [ "$PUBLISHED" -eq 1 ] || { echo "Δεν δημοσιεύτηκε το Release $TAG"; exit 1; }
+
           gh release view "$TAG" --repo "$GITHUB_REPOSITORY"
           git push origin --delete "$GITHUB_REF_NAME"
