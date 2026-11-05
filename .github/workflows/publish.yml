@@ -1,6 +1,4 @@
-# Δημοσίευση έκδοσης: το branch upload/vX.Y.Z περιέχει τα κομμάτια του installer
-# και το manifest. Το workflow ενώνει το αρχείο, ελέγχει το SHA-256 και
-# δημοσιεύει το Release με ασφαλή επανάληψη σε περίπτωση διακοπής.
+# Ασφαλής δημοσίευση εκδόσεων PDFDesk από branch upload/vX.Y.Z.
 name: publish
 on:
   push:
@@ -12,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Ένωση και έλεγχος
+      - name: Ένωση και έλεγχος SHA-256
         run: |
           set -euo pipefail
           V="${GITHUB_REF_NAME#upload/v}"
@@ -20,8 +18,10 @@ jobs:
           WANT=$(cat release/sha256.txt)
           GOT=$(sha256sum PDFDesk-Setup-$V.exe | cut -d' ' -f1)
           [ "$WANT" = "$GOT" ] || { echo "SHA-256 mismatch"; exit 1; }
+          SIZE=$(stat -c %s "PDFDesk-Setup-$V.exe")
           echo "V=$V" >> "$GITHUB_ENV"
-      - name: Δημιουργία και δημοσίευση Release
+          echo "SIZE=$SIZE" >> "$GITHUB_ENV"
+      - name: Δημιουργία Release και μεταφόρτωση αρχείων
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -33,42 +33,73 @@ jobs:
               --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -n 1
           }
 
-          # Reuse an existing draft/published release, or create a draft first.
           RELEASE_ID=$(find_release_id || true)
           if [ -z "$RELEASE_ID" ]; then
+            NOTES=$(cat release/notes.txt)
             CREATED=0
             for ATTEMPT in 1 2 3 4 5 6; do
-              if gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
-                  --target main --title "PDFDesk $V" --notes-file release/notes.txt --draft; then
+              RESPONSE=$(gh api --method POST "repos/$GITHUB_REPOSITORY/releases" \
+                -f tag_name="$TAG" \
+                -f target_commitish=main \
+                -f name="PDFDesk $V" \
+                -f body="$NOTES" \
+                -F draft=true \
+                -F prerelease=false 2>/dev/null || true)
+              RELEASE_ID=$(jq -r '.id // empty' <<< "$RESPONSE")
+              if [ -n "$RELEASE_ID" ]; then
                 CREATED=1
                 break
               fi
+              # Αν το API επέστρεψε σφάλμα μετά τη δημιουργία, εντοπίζουμε
+              # το ήδη υπάρχον draft αντί να δημιουργήσουμε δεύτερο.
               RELEASE_ID=$(find_release_id || true)
               [ -n "$RELEASE_ID" ] && { CREATED=1; break; }
               if [ "$ATTEMPT" -lt 6 ]; then
                 echo "Προσωρινό σφάλμα δημιουργίας Release· νέα προσπάθεια..."
-                sleep 15
+                sleep $((ATTEMPT * 5))
               fi
             done
             [ "$CREATED" -eq 1 ] || { echo "Δεν δημιουργήθηκε το Release $TAG"; exit 1; }
-            RELEASE_ID=$(find_release_id || true)
           fi
           [ -n "$RELEASE_ID" ] || { echo "Δεν βρέθηκε το Release $TAG"; exit 1; }
           echo "Release ID: $RELEASE_ID"
 
-          # Upload only missing assets; the draft can safely be resumed after interruption.
+          upload_asset() {
+            local file="$1"
+            local name="$2"
+            local url="https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=$name"
+            for ATTEMPT in 1 2 3 4 5; do
+              if curl --fail-with-body --silent --show-error -L \
+                  -X POST "$url" \
+                  -H "Authorization: Bearer $GH_TOKEN" \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "Content-Type: application/octet-stream" \
+                  --data-binary "@$file" >/dev/null; then
+                return 0
+              fi
+              if [ "$ATTEMPT" -lt 5 ]; then sleep $((ATTEMPT * 5)); fi
+            done
+            echo "Αποτυχία μεταφόρτωσης: $name"
+            return 1
+          }
+
           ASSETS=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" \
             --jq '[.assets[].name] | join("\n")')
           if ! grep -Fxq "PDFDesk-Setup-$V.exe" <<< "$ASSETS"; then
-            gh release upload "$TAG" "PDFDesk-Setup-$V.exe" \
-              --repo "$GITHUB_REPOSITORY" --clobber
+            upload_asset "PDFDesk-Setup-$V.exe" "PDFDesk-Setup-$V.exe"
           fi
           if ! grep -Fxq "pdfdesk-update.json" <<< "$ASSETS"; then
-            gh release upload "$TAG" release/pdfdesk-update.json \
-              --repo "$GITHUB_REPOSITORY" --clobber
+            upload_asset "release/pdfdesk-update.json" "pdfdesk-update.json"
           fi
 
-          # Publish first, then designate this release as latest.
+          # Επιβεβαίωση assets, μεγέθους και δημοσίευση.
+          META=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID")
+          ASSETS=$(jq -r '[.assets[].name] | join("\n")' <<< "$META")
+          grep -Fxq "PDFDesk-Setup-$V.exe" <<< "$ASSETS"
+          grep -Fxq "pdfdesk-update.json" <<< "$ASSETS"
+          ASSET_SIZE=$(jq -r ".assets[] | select(.name == \"PDFDesk-Setup-$V.exe\") | .size" <<< "$META")
+          [ "$ASSET_SIZE" = "$SIZE" ] || { echo "Installer size mismatch"; exit 1; }
+
           PUBLISHED=0
           for ATTEMPT in 1 2 3 4 5 6; do
             if gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" \
@@ -76,10 +107,7 @@ jobs:
               PUBLISHED=1
               break
             fi
-            if [ "$ATTEMPT" -lt 6 ]; then
-              echo "Προσωρινό σφάλμα δημοσίευσης· νέα προσπάθεια..."
-              sleep 15
-            fi
+            if [ "$ATTEMPT" -lt 6 ]; then sleep $((ATTEMPT * 5)); fi
           done
           [ "$PUBLISHED" -eq 1 ] || { echo "Δεν δημοσιεύτηκε το Release $TAG"; exit 1; }
 
