@@ -26,6 +26,31 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release create "v$V" "PDFDesk-Setup-$V.exe" release/pdfdesk-update.json \
-            --repo "$GITHUB_REPOSITORY" --target main --title "PDFDesk $V" --notes-file release/notes.txt --latest
+          TAG="v$V"
+          PUBLISHED=0
+          # Retry transient failures from GitHub's Releases API.
+          for ATTEMPT in 1 2 3 4 5 6 7 8; do
+            if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "Το Release υπάρχει ήδη· ολοκλήρωση μεταφόρτωσης αρχείων."
+              if gh release upload "$TAG" "PDFDesk-Setup-$V.exe" release/pdfdesk-update.json \
+                  --repo "$GITHUB_REPOSITORY" --clobber &&
+                 gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --latest; then
+                PUBLISHED=1
+                break
+              fi
+            else
+              if gh release create "$TAG" "PDFDesk-Setup-$V.exe" release/pdfdesk-update.json \
+                  --repo "$GITHUB_REPOSITORY" --target main --title "PDFDesk $V" \
+                  --notes-file release/notes.txt --latest; then
+                PUBLISHED=1
+                break
+              fi
+            fi
+            if [ "$ATTEMPT" -lt 8 ]; then
+              echo "Αποτυχία προσωρινής επικοινωνίας· νέα προσπάθεια σε $((ATTEMPT * 10)) δευτερόλεπτα."
+              sleep $((ATTEMPT * 10))
+            fi
+          done
+          [ "$PUBLISHED" -eq 1 ] || { echo "Αποτυχία δημοσίευσης μετά από 8 προσπάθειες."; exit 1; }
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY"
           git push origin --delete "$GITHUB_REF_NAME"
