@@ -1,0 +1,261 @@
+**********************
+PowerShell transcript start
+Start time: 20261108114704
+Username: runnervmm7ud1\runneradmin
+RunAs User: runnervmm7ud1\runneradmin
+Configuration Name: 
+Machine: runnervmm7ud1 (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -command . 'D:\a\_temp\95598c6b-1b3d-4285-a7ba-40592fcf3b36.ps1'
+Process ID: 6492
+PSVersion: 7.6.9
+PSEdition: Core
+GitCommitId: 7.6.9
+OS: Microsoft Windows 10.0.26100
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+== Βιβλιοθήκες
+Requirement already satisfied: pip in C:\hostedtoolcache\windows\Python\3.13.17\x64\Lib\site-packages (26.3)
+Collecting pyinstaller
+  Downloading pyinstaller-6.22.3-py3-none-win_amd64.whl.metadata (8.5 kB)
+Collecting pytest
+  Downloading pytest-9.2.0-py3-none-any.whl.metadata (7.9 kB)
+Collecting qrcode
+  Downloading qrcode-8.2-py3-none-any.whl.metadata (17 kB)
+Collecting pillow
+  Downloading pillow-13.0.0-cp313-cp313-win_amd64.whl.metadata (9.3 kB)
+Collecting PySide6-Essentials>=6.8 (from -r requirements.txt (line 1))
+  Downloading pyside6_essentials-6.12.0-cp310-abi3-win_amd64.whl.metadata (3.9 kB)
+Collecting PySide6-Addons>=6.8 (from -r requirements.txt (line 2))
+  Downloading pyside6_addons-6.12.0-cp310-abi3-win_amd64.whl.metadata (4.4 kB)
+Collecting pymupdf<2,>=1.28 (from -r requirements.txt (line 3))
+  Downloading pymupdf-1.28.2-cp310-abi3-win_amd64.whl.metadata (26 kB)
+Collecting spylls>=0.1.7 (from -r requirements.txt (line 4))
+  Downloading spylls-0.1.7-py2.py3-none-any.whl.metadata (3.0 kB)
+Collecting python-docx>=1.1 (from -r requirements.txt (line 5))
+  Downloading python_docx-1.2.0-py3-none-any.whl.metadata (2.0 kB)
+Collecting openpyxl>=3.1 (from -r requirements.txt (line 6))
+  Downloading openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+Collecting zxing-cpp>=2.2 (from -r requirements.txt (line 7))
+  Downloading zxing_cpp-3.1.1-cp312-abi3-win_amd64.whl.metadata (2.3 kB)
+Collecting asn1crypto>=1.5 (from -r requirements.txt (line 8))
+  Downloading asn1crypto-1.5.1-py2.py3-none-any.whl.metadata (13 kB)
+Collecting cryptography>=42 (from -r requirements.txt (line 9))
+  Downloading cryptography-50.0.2-cp311-abi3-win_amd64.whl.metadata (4.4 kB)
+Collecting altgraph (from pyinstaller)
+  Downloading altgraph-0.17.5-py2.py3-none-any.whl.metadata (7.5 kB)
+Collecting packaging>=22.0 (from pyinstaller)
+  Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting pefile>=2022.5.30 (from pyinstaller)
+  Downloading pefile-2024.8.26-py3-none-any.whl.metadata (1.4 kB)
+Collecting pyinstaller-hooks-contrib>=2026.7 (from pyinstaller)
+  Downloading pyinstaller_hooks_contrib-2026.9-py3-none-any.whl.metadata (16 kB)
+Collecting pywin32-ctypes>=0.2.1 (from pyinstaller)
+  Downloading pywin32_ctypes-0.2.3-py3-none-any.whl.metadata (3.9 kB)
+Collecting setuptools>=42.0.0 (from pyinstaller)
+  Downloading setuptools-84.2.1-py3-none-any.whl.metadata (6.6 kB)
+Collecting colorama>=0.4 (from pytest)
+  Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+Collecting iniconfig>=2 (from pytest)
+  Downloading iniconfig-2.3.1-py3-none-any.whl.metadata (2.8 kB)
+Collecting pluggy<2,>=1.6 (from pytest)
+  Downloading pluggy-1.7.0-py3-none-any.whl.metadata (5.0 kB)
+Collecting pygments>=2.15 (from pytest)
+  Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting shiboken6==6.12.0 (from PySide6-Essentials>=6.8->-r requirements.txt (line 1))
+  Downloading shiboken6-6.12.0-cp310-abi3-win_amd64.whl.metadata (2.6 kB)
+Collecting lxml>=3.1.0 (from python-docx>=1.1->-r requirements.txt (line 5))
+  Downloading lxml-6.1.3-cp313-cp313-win_amd64.whl.metadata (3.4 kB)
+Collecting typing_extensions>=4.9.0 (from python-docx>=1.1->-r requirements.txt (line 5))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting et-xmlfile (from openpyxl>=3.1->-r requirements.txt (line 6))
+  Downloading et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+Collecting cffi>=2.0.0 (from cryptography>=42->-r requirements.txt (line 9))
+  Downloading cffi-2.1.1-cp313-cp313-win_amd64.whl.metadata (2.6 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=42->-r requirements.txt (line 9))
+  Downloading pycparser-3.12-py3-none-any.whl.metadata (9.7 kB)
+Downloading pymupdf-1.28.2-cp310-abi3-win_amd64.whl (19.8 MB)
+   ---------------------------------------- 19.8/19.8 MB 91.6 MB/s  0:00:00
+Downloading pyinstaller-6.22.3-py3-none-win_amd64.whl (1.5 MB)
+   ---------------------------------------- 1.5/1.5 MB 36.8 MB/s  0:00:00
+Downloading pytest-9.2.0-py3-none-any.whl (411 kB)
+Downloading pluggy-1.7.0-py3-none-any.whl (27 kB)
+Downloading qrcode-8.2-py3-none-any.whl (45 kB)
+Downloading pillow-13.0.0-cp313-cp313-win_amd64.whl (7.3 MB)
+   ---------------------------------------- 7.3/7.3 MB 116.2 MB/s  0:00:00
+Downloading pyside6_essentials-6.12.0-cp310-abi3-win_amd64.whl (82.2 MB)
+   ---------------------------------------- 82.2/82.2 MB 25.5 MB/s  0:00:03
+Downloading shiboken6-6.12.0-cp310-abi3-win_amd64.whl (1.3 MB)
+   ---------------------------------------- 1.3/1.3 MB 42.0 MB/s  0:00:00
+Downloading pyside6_addons-6.12.0-cp310-abi3-win_amd64.whl (40.5 MB)
+   ---------------------------------------- 40.5/40.5 MB 42.2 MB/s  0:00:00
+Downloading spylls-0.1.7-py2.py3-none-any.whl (1.5 MB)
+   ---------------------------------------- 1.5/1.5 MB 39.2 MB/s  0:00:00
+Downloading python_docx-1.2.0-py3-none-any.whl (252 kB)
+Downloading openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+Downloading zxing_cpp-3.1.1-cp312-abi3-win_amd64.whl (1.0 MB)
+   ---------------------------------------- 1.0/1.0 MB 33.0 MB/s  0:00:00
+Downloading asn1crypto-1.5.1-py2.py3-none-any.whl (105 kB)
+Downloading cryptography-50.0.2-cp311-abi3-win_amd64.whl (3.8 MB)
+   ---------------------------------------- 3.8/3.8 MB 99.5 MB/s  0:00:00
+Downloading cffi-2.1.1-cp313-cp313-win_amd64.whl (185 kB)
+Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+Downloading iniconfig-2.3.1-py3-none-any.whl (7.6 kB)
+Downloading lxml-6.1.3-cp313-cp313-win_amd64.whl (4.0 MB)
+   ---------------------------------------- 4.0/4.0 MB 83.3 MB/s  0:00:00
+Downloading packaging-26.3-py3-none-any.whl (129 kB)
+Downloading pefile-2024.8.26-py3-none-any.whl (74 kB)
+Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+   ---------------------------------------- 1.3/1.3 MB 42.3 MB/s  0:00:00
+Downloading pyinstaller_hooks_contrib-2026.9-py3-none-any.whl (462 kB)
+Downloading pywin32_ctypes-0.2.3-py3-none-any.whl (30 kB)
+Downloading setuptools-84.2.1-py3-none-any.whl (876 kB)
+   ---------------------------------------- 876.3/876.3 kB 27.7 MB/s  0:00:00
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading altgraph-0.17.5-py2.py3-none-any.whl (21 kB)
+Downloading et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Downloading pycparser-3.12-py3-none-any.whl (62 kB)
+Installing collected packages: asn1crypto, altgraph, zxing-cpp, typing_extensions, spylls, shiboken6, setuptools, pywin32-ctypes, pymupdf, pygments, pycparser, pluggy, pillow, pefile, packaging, lxml, iniconfig, et-xmlfile, colorama, qrcode, python-docx, pytest, PySide6-Essentials, pyinstaller-hooks-contrib, openpyxl, cffi, PySide6-Addons, pyinstaller, cryptography
+
+Successfully installed PySide6-Addons-6.12.0 PySide6-Essentials-6.12.0 altgraph-0.17.5 asn1crypto-1.5.1 cffi-2.1.1 colorama-0.4.6 cryptography-50.0.2 et-xmlfile-2.0.0 iniconfig-2.3.1 lxml-6.1.3 openpyxl-3.1.5 packaging-26.3 pefile-2024.8.26 pillow-13.0.0 pluggy-1.7.0 pycparser-3.12 pygments-2.21.0 pyinstaller-6.22.3 pyinstaller-hooks-contrib-2026.9 pymupdf-1.28.2 pytest-9.2.0 python-docx-1.2.0 pywin32-ctypes-0.2.3 qrcode-8.2 setuptools-84.2.1 shiboken6-6.12.0 spylls-0.1.7 typing_extensions-4.16.0 zxing-cpp-3.1.1
+== Έλεγχοι
+........................................................................ [ 83%]
+..............                                                           [100%]
+86 passed in 28.83s
+== Εικονίδιο εφαρμογής
+Generated assets\icon.png and assets\icon.ico
+== PyInstaller
+195 INFO: PyInstaller: 6.22.3, contrib hooks: 2026.9
+195 INFO: Python: 3.13.17
+222 INFO: Platform: Windows-2025Server-10.0.26100-SP0
+222 INFO: Python environment: C:\hostedtoolcache\windows\Python\3.13.17\x64
+223 INFO: wrote build\PDFDesk.spec
+230 INFO: Removing temporary files and cleaning cache in C:\Users\runneradmin\AppData\Local\pyinstaller
+571 INFO: Module search paths (PYTHONPATH):
+['D:\\a\\pdfdesk-releases\\pdfdesk-releases\\src',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\python313.zip',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\DLLs',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages',
+ 'D:\\a\\pdfdesk-releases\\pdfdesk-releases\\src\\tools',
+ 'D:\\a\\pdfdesk-releases\\pdfdesk-releases\\src']
+852 INFO: Appending 'datas' from .spec
+854 INFO: checking Analysis
+855 INFO: Building Analysis because Analysis-00.toc is non existent
+855 INFO: Looking for Python shared library...
+855 INFO: Using Python shared library: C:\hostedtoolcache\windows\Python\3.13.17\x64\python313.dll
+855 INFO: Running Analysis Analysis-00.toc
+855 INFO: Target bytecode optimization level: 0
+855 INFO: Initializing module dependency graph...
+856 INFO: Initializing module graph hook caches...
+883 INFO: Analyzing modules for base_library.zip ...
+2135 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+2586 INFO: Processing standard module hook 'hook-math.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+2928 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+4295 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6155 INFO: Caching module dependency graph...
+6197 INFO: Analyzing D:\a\pdfdesk-releases\pdfdesk-releases\src\tools\launcher.py
+6463 INFO: Processing standard module hook 'hook-PySide6.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6628 INFO: Processing standard module hook 'hook-shiboken6.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6897 INFO: Processing standard module hook 'hook-PySide6.QtNetwork.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+9632 INFO: Processing standard module hook 'hook-PySide6.QtCore.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+13186 INFO: Processing standard module hook 'hook-PySide6.QtWidgets.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+16658 INFO: Processing standard module hook 'hook-PySide6.QtGui.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+47426 INFO: Processing standard module hook 'hook-PySide6.QtSvg.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+47780 INFO: Processing standard module hook 'hook-sysconfig.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+47785 INFO: Processing standard module hook 'hook-_ctypes.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+50974 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+51085 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+51495 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+52010 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+52216 INFO: Processing standard module hook 'hook-cryptography.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+53133 INFO: hook-cryptography: cryptography does not seem to be using dynamically linked OpenSSL.
+53204 INFO: Processing standard module hook 'hook-docx.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+53315 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+53316 INFO: SetuptoolsInfo: initializing cached setuptools info...
+54782 INFO: Processing standard module hook 'hook-lxml.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+55044 INFO: Processing standard module hook 'hook-lxml.etree.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+55493 INFO: Processing standard module hook 'hook-openpyxl.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+55806 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+57150 INFO: Processing standard module hook 'hook-PySide6.QtPrintSupport.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+57788 INFO: Processing standard module hook 'hook-PySide6.QtTextToSpeech.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+59973 INFO: Processing module hooks (post-graph stage)...
+60579 INFO: Processing standard module hook 'hook-webbrowser.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+60984 INFO: Processing standard module hook 'hook-lxml.isoschematron.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+61204 INFO: Processing standard module hook 'hook-PySide6.QtMultimedia.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+62802 INFO: Processing standard module hook 'hook-lxml.objectify.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+62809 INFO: Processing standard module hook 'hook-PySide6.QtMultimediaWidgets.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+63210 INFO: Performing binary vs. data reclassification (208 entries)
+63244 INFO: Looking for ctypes DLLs
+63282 INFO: Analyzing run-time hooks ...
+63286 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+63290 INFO: Including run-time hook 'pyi_rth_cryptography_openssl.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks'
+63291 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+63294 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+63297 INFO: Including run-time hook 'pyi_rth_pyside6.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+63300 INFO: Processing pre-find-module-path hook 'hook-_pyi_rth_utils.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\pre_find_module_path'
+63302 INFO: Processing standard module hook 'hook-_pyi_rth_utils.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+63319 INFO: Creating base_library.zip...
+63344 INFO: Looking for dynamic libraries
+64083 INFO: Extra DLL search directories (AddDllDirectory): ['C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\shiboken6']
+64083 INFO: Extra DLL search directories (PATH): ['C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PySide6']
+66003 INFO: Warnings written to D:\a\pdfdesk-releases\pdfdesk-releases\src\build\work\PDFDesk\warn-PDFDesk.txt
+66063 INFO: Graph cross-reference written to D:\a\pdfdesk-releases\pdfdesk-releases\src\build\work\PDFDesk\xref-PDFDesk.html
+66097 INFO: checking PYZ
+66097 INFO: Building PYZ because PYZ-00.toc is non existent
+66097 INFO: Building PYZ (ZlibArchive) D:\a\pdfdesk-releases\pdfdesk-releases\src\build\work\PDFDesk\PYZ-00.pyz
+66880 INFO: Building PYZ (ZlibArchive) D:\a\pdfdesk-releases\pdfdesk-releases\src\build\work\PDFDesk\PYZ-00.pyz completed successfully.
+66903 INFO: checking PKG
+66903 INFO: Building PKG because PKG-00.toc is non existent
+66903 INFO: Building PKG (CArchive) PDFDesk.pkg
+66921 INFO: Building PKG (CArchive) PDFDesk.pkg completed successfully.
+66922 INFO: Bootloader C:\hostedtoolcache\windows\Python\3.13.17\x64\Lib\site-packages\PyInstaller\bootloader\Windows-64bit-intel\runw.exe
+66922 INFO: checking EXE
+66922 INFO: Building EXE because EXE-00.toc is non existent
+66922 INFO: Building EXE from EXE-00.toc
+66923 INFO: Copying bootloader EXE to D:\a\pdfdesk-releases\pdfdesk-releases\src\build\work\PDFDesk\PDFDesk.exe
+66925 INFO: Copying icon to EXE
+66928 INFO: Copying 0 resources to EXE
+66928 INFO: Embedding manifest in EXE
+66930 INFO: Appending PKG archive to EXE
+66933 INFO: Fixing EXE headers
+67014 INFO: Building EXE from EXE-00.toc completed successfully.
+67018 INFO: checking COLLECT
+67018 INFO: Building COLLECT because COLLECT-00.toc is non existent
+67018 INFO: Building COLLECT COLLECT-00.toc
+67394 INFO: Building COLLECT COLLECT-00.toc completed successfully.
+67402 INFO: Build complete! The results are available in: D:\a\pdfdesk-releases\pdfdesk-releases\src\build\stage
+== NSIS
+Chocolatey v2.7.5
+Installing the following packages:
+nsis
+By installing, you accept licenses for the packages.
+Downloading package from source 'https://community.chocolatey.org/api/v2/'
+
+nsis.install v3.13.0 [Approved]
+nsis.install package files install completed. Performing other installation steps.
+Installing nsis.install...
+nsis.install has been installed.
+  nsis.install can be automatically uninstalled.
+ The install of nsis.install was successful.
+  Deployed to 'C:\Program Files (x86)\NSIS'
+Downloading package from source 'https://community.chocolatey.org/api/v2/'
+
+nsis v3.13.0 [Approved]
+nsis package files install completed. Performing other installation steps.
+ The install of nsis was successful.
+  Deployed to 'C:\ProgramData\chocolatey\lib\nsis'
+
+Chocolatey installed 2/2 packages.
+ See the log for details (C:\ProgramData\chocolatey\logs\chocolatey.log).
+== Δοκιμή εγκατάστασης
+self-test: OK 1.0.2 pymupdf 1.28.2
+== Έτοιμο: build\PDFDesk-Setup-1.0.2.exe (63.1 MB)
+**********************
+PowerShell transcript end
+End time: 20261108115121
+**********************
