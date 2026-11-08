@@ -1,0 +1,124 @@
+# Κατασκευή PDFDesk στο ΔΗΜΟΣΙΟ αποθετήριο (δωρεάν Actions χωρίς όριο).
+# Ο κώδικας μένει στο ιδιωτικό ACBOApps/pdfdesk και διαβάζεται με token μόνο-ανάγνωσης.
+#
+# Ξεκινά όταν ανεβαίνει branch build/vX.Y.Z που περιέχει το request.json:
+#   {"version": "1.0.2", "sha": "<commit του ιδιωτικού αποθετηρίου>"}
+# Μία κατασκευή ανά έκδοση: νέα ώθηση στο ίδιο branch ακυρώνει την προηγούμενη.
+name: build
+on:
+  push:
+    branches: ['build/v*']
+permissions:
+  contents: write
+concurrency:
+  group: pdfdesk-build-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: rel
+
+      - name: Αίτημα κατασκευής
+        id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          V="${GITHUB_REF_NAME#build/v}"
+          REQ_V=$(python -c "import json;print(json.load(open('rel/request.json'))['version'])")
+          SHA=$(python -c "import json;print(json.load(open('rel/request.json'))['sha'])")
+          [ "$V" = "$REQ_V" ] || { echo "Η έκδοση του branch ($V) δεν ταιριάζει με το request.json ($REQ_V)"; exit 1; }
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "Μη έγκυρο sha"; exit 1; }
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Κώδικας από το ιδιωτικό αποθετήριο
+        uses: actions/checkout@v4
+        with:
+          repository: ACBOApps/pdfdesk
+          ref: ${{ steps.req.outputs.sha }}
+          token: ${{ secrets.PDFDESK_SOURCE_TOKEN }}
+          path: src
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Κατασκευή (τεστ, PyInstaller, NSIS, self-test)
+        shell: pwsh
+        working-directory: src
+        run: ./tools/build_windows.ps1 -Version ${{ steps.req.outputs.version }}
+
+      - name: Υπογραφή Ed25519 και έλεγχος
+        shell: bash
+        working-directory: src
+        env:
+          PDFDESK_ED25519_PRIVATE_KEY_B64: ${{ secrets.PDFDESK_ED25519_PRIVATE_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          V="${{ steps.req.outputs.version }}"
+          [ -n "$PDFDESK_ED25519_PRIVATE_KEY_B64" ] || { echo "Λείπει το secret PDFDESK_ED25519_PRIVATE_KEY_B64"; exit 1; }
+          mkdir -p ../out
+          cp "build/PDFDesk-Setup-$V.exe" ../out/
+          python tools/sign_manifest.py --version "$V" --installer "build/PDFDesk-Setup-$V.exe" --output-dir ../out
+          python tools/verify_manifest.py --manifest ../out/pdfdesk-update.json --version "$V" \
+            --installer "build/PDFDesk-Setup-$V.exe" --updater pdfdesk/updater.py
+          ls -la ../out
+
+      - name: Δημοσίευση Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          V="${{ steps.req.outputs.version }}"
+          TAG="v$V"
+          cd out
+          SIZE=$(stat -c %s "PDFDesk-Setup-$V.exe")
+          EXISTING=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -n1 || true)
+          if [ -n "$EXISTING" ]; then
+            DRAFT=$(gh api "repos/$GITHUB_REPOSITORY/releases/$EXISTING" --jq '.draft')
+            [ "$DRAFT" = "true" ] || { echo "Το $TAG είναι ήδη δημοσιευμένο· δεν αντικαθίσταται"; exit 1; }
+            gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/$EXISTING"
+          fi
+          ID=$(gh api --method POST "repos/$GITHUB_REPOSITORY/releases" -f tag_name="$TAG" -f target_commitish=main \
+                 -f name="PDFDesk $V" -f body="$(cat notes.txt)" -F draft=true --jq '.id')
+          for f in "PDFDesk-Setup-$V.exe" pdfdesk-update.json notes.txt; do
+            for A in 1 2 3 4 5; do
+              curl --fail-with-body -sS -X POST \
+                "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$ID/assets?name=$f" \
+                -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/octet-stream" \
+                --data-binary "@$f" >/dev/null && break
+              [ "$A" -lt 5 ] || { echo "Αποτυχία μεταφόρτωσης $f"; exit 1; }
+              sleep $((A * 5))
+            done
+          done
+          GOT=$(gh api "repos/$GITHUB_REPOSITORY/releases/$ID" --jq ".assets[] | select(.name == \"PDFDesk-Setup-$V.exe\") | .size")
+          [ "$GOT" = "$SIZE" ] || { echo "Λάθος μέγεθος installer"; exit 1; }
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/$ID" -F draft=false -f make_latest=true >/dev/null
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY"
+
+      - name: Αρχείο καταγραφής (σε αποτυχία)
+        if: failure()
+        shell: bash
+        working-directory: rel
+        run: |
+          V="${GITHUB_REF_NAME#build/v}"
+          cp ../src/build/build.log ../build.log 2>/dev/null || echo "χωρίς build.log (αποτυχία πριν την κατασκευή)" > ../build.log
+          tail -n 120 ../build.log
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -q --orphan "build-failed/v$V"
+          git rm -rfq --cached . ; git clean -fdxq
+          cp ../build.log build.log
+          git add build.log && git commit -qm "Build $V failed" && git push -q -f origin "build-failed/v$V"
+
+      - name: Καθαρισμός branch αιτήματος
+        if: success()
+        shell: bash
+        working-directory: rel
+        run: git push -q origin --delete "$GITHUB_REF_NAME" || true
