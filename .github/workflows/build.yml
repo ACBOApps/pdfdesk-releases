@@ -10,6 +10,10 @@ on:
     branches: ['build/v*']
 permissions:
   contents: write
+env:
+  # η κονσόλα των Windows είναι cp1252: χωρίς αυτό τα ελληνικά μηνύματα «σκάνε»
+  PYTHONUTF8: '1'
+  PYTHONIOENCODING: utf-8
 concurrency:
   group: pdfdesk-build-${{ github.ref }}
   cancel-in-progress: true
